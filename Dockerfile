@@ -1,40 +1,23 @@
 # syntax=docker/dockerfile:1.7
 
-FROM debian:bookworm-slim AS builder
+FROM nixos/nix:latest AS builder
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["/bin/sh", "-ec"]
 
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-    bash \
-    ca-certificates \
-    curl \
-    git \
-    xz-utils \
- && rm -rf /var/lib/apt/lists/*
-
-ENV NIX_INSTALLER_NO_MODIFY_PROFILE=1
 ENV NIX_CONFIG="experimental-features = nix-command flakes"
-ENV PATH="/nix/var/nix/profiles/default/bin:${PATH}"
 
 WORKDIR /src
 COPY . .
 
-RUN curl -fsSL https://install.determinate.systems/nix | sh -s -- install linux --init none --no-confirm
-
-ARG FLAKE_ATTR=.#merlinai-proxy
+ARG FLAKE_ATTR=path:.#merlinai-proxy
 
 RUN nix build "$FLAKE_ATTR" --accept-flake-config --no-link \
  && out="$(nix path-info "$FLAKE_ATTR" --accept-flake-config)" \
  && mkdir -p /tmp/closure/usr/local/bin \
- && while IFS= read -r path; do cp -a --parents "$path" /tmp/closure; done < <(nix-store -qR "$out") \
+ && nix-store -qR "$out" | while IFS= read -r path; do cp -a --parents "$path" /tmp/closure; done \
  && ln -s "$out/bin/merlinai-proxy" /tmp/closure/usr/local/bin/merlinai-proxy
 
-FROM debian:bookworm-slim AS runtime
-
-RUN apt-get update \
- && apt-get install -y --no-install-recommends ca-certificates \
- && rm -rf /var/lib/apt/lists/*
+FROM nixos/nix:latest AS runtime
 
 COPY --from=builder /tmp/closure/ /
 
