@@ -40,6 +40,40 @@ uv run python main.py
 
 伺服器將在 `http://0.0.0.0:8000` 啟動。
 
+## Nix 安裝與執行
+
+如果你有 Nix，可以直接建置並執行原生封裝版本：
+
+```bash
+nix run .#merlinai-proxy
+```
+
+若只想建置安裝包：
+
+```bash
+nix build .#merlinai-proxy
+```
+
+Linux 上也可以直接輸出 Docker image tarball：
+
+```bash
+nix build .#merlinai-proxy-image
+```
+
+## Docker 建置（不需本機先安裝 Nix）
+
+專案內建的 `Dockerfile` 會在 builder stage 安裝 Nix，使用 flake 建出原生封裝，最後只把執行所需 closure 複製進 runtime stage。
+
+```bash
+docker build -t merlinai-proxy .
+```
+
+執行方式：
+
+```bash
+docker run --rm -p 8000:8000 --env-file .env merlinai-proxy
+```
+
 ## Docker Compose
 
 建立好 `.env` 後，直接執行：
