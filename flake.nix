@@ -87,6 +87,20 @@ EOF
           name = merlinai-proxy.pname;
           tag = "${merlinai-proxy.version}-${lib.substring 0 12 (builtins.hashString "sha256" merlinai-proxy.drvPath)}";
           contents = [merlinai-proxy];
+          extraCommands = ''
+            find . -type d -name __pycache__ -prune -exec rm -rf {} +
+            rm -rf ./nix/store/*-python3-*/lib/python3.12/idlelib
+            rm -rf ./nix/store/*-python3-*/lib/python3.12/test
+            rm -rf ./nix/store/*-python3-*/lib/python3.12/tkinter
+            rm -rf ./nix/store/*-python3-*/lib/python3.12/turtledemo
+            rm -rf ./nix/store/*-python3-*/lib/python3.12/ensurepip
+            rm -rf ./nix/store/*-python3-*/lib/python3.12/venv
+            rm -rf ./nix/store/*-python3-*/lib/python3.12/pydoc_data
+            rm -rf ./nix/store/*-python3-*/lib/python3.12/config-*
+            rm -rf ./nix/store/*-python3-*/include
+            rm -f ./nix/store/*-python3-*/bin/idle ./nix/store/*-python3-*/bin/idle3
+            rm -f ./nix/store/*-python3-*/bin/pydoc ./nix/store/*-python3-*/bin/pydoc3
+          '';
           config = {
             Cmd = ["${merlinai-proxy}/bin/${merlinai-proxy.pname}"];
             Env = [
