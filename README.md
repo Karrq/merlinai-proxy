@@ -62,7 +62,7 @@ nix build .#merlinai-proxy-image
 
 ## Docker 建置（不需本機先安裝 Nix）
 
-專案內建的 `Dockerfile` 直接使用 Nix base image 作為 builder 與 runtime。builder stage 會用 flake 建出原生封裝，最後把執行所需 closure 複製進 runtime stage。
+專案內建的 `Dockerfile` 使用 Nix base image 作為 builder stage，並用 `scratch` 當 runtime stage。builder 會用 flake 建出原生封裝，最後只把執行所需 closure 複製進最小化的 runtime image。
 
 ```bash
 docker build -t merlinai-proxy .

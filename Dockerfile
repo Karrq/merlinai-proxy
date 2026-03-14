@@ -17,7 +17,7 @@ RUN nix build "$FLAKE_ATTR" --accept-flake-config --no-link \
  && nix-store -qR "$out" | while IFS= read -r path; do cp -a --parents "$path" /tmp/closure; done \
  && ln -s "$out/bin/merlinai-proxy" /tmp/closure/usr/local/bin/merlinai-proxy
 
-FROM nixos/nix:latest AS runtime
+FROM scratch AS runtime
 
 COPY --from=builder /tmp/closure/ /
 
